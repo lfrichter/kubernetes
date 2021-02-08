@@ -1,0 +1,17 @@
+# kubectl apply -f configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+  labels:
+    app: myapplication
+data:
+  nginx.conf: |
+
+    server {
+      listen 80;
+      index index.php index.html;
+      root /usr/share/nginx/html;
+
+      rewrite ^/google$ http://google.com permanent;
+    }

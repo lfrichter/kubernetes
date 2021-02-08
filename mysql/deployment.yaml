@@ -1,0 +1,45 @@
+# kubectl apply -f deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  mysql-server
+  labels:
+    name:  mysql-server
+spec:
+  replicas: 1
+
+  selector: # Selector using to create a Service
+    matchLabels:
+      app: mysql-server
+      tier: db
+
+  template: # POD 
+    metadata:
+      labels:
+        app: mysql-server
+        tier: db
+    spec: # spec do POD 
+      containers:
+      - image:  mysql:5.7
+        name:  mysql-server
+        args: 
+          - "--ignore-db-dir=lost+found"
+
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+
+        ports:
+        - containerPort:  3306
+        volumeMounts:
+         - name: mysql-persistent-storage
+           mountPath: /var/lib/mysql
+      
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+
