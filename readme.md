@@ -360,10 +360,10 @@ spec:
  
 ```
 
-## Autoscaler
+## HPA - Horizontal Pod Autoscaler
 1. create a folder `php-apache`
 2. create `index.php`
-```
+```php
 <?php
 
 $x = 0.000001;
@@ -389,15 +389,16 @@ RUN chmod a+rx index.php
 	1. create a file `hpa.yaml` with:
 ```
 # kubectl apply -f hpa.yaml
+# kubectl get hpa
 apiVersion: autoscaling/v1
-kind: HorizontalPosAutoscaler
+kind: HorizontalPodAutoscaler
 metadata:
   name: php-apache-hpa
 spec:
   maxReplicas: 5
   minReplicas: 1
   scaleTargetRef: 
-    apiVersion: extension/v1beta1
+    apiVersion: extensions/v1beta1
     kind: Deployment
     name: php-apache-hpa
   targetCPUUtilizationPercentage: 20
@@ -406,3 +407,15 @@ spec:
 
 #### Testing HPA
 1. `kubectl run -it loader --image=busybox /bin/sh`
+	- `busybox` é um linux super pequeno, o mais básico para rodar algo
+2. Criar e executar um looping para essa máquina ficar chamando o php-apache
+	- `default` é o namespace padrão do kubernetes
+	- Acessar página PHP
+	```
+	# wget -q -O- http://php-apache-hpa.default.svc.cluster.local;
+	```
+	- Criar looping infinito
+	```
+	while true; do wget -q -O- http://php-apache-hpa.default.svc.cluster.local; done;
+	```
+3. Verifique se está funcionando em `watch kubectl get hpa`
